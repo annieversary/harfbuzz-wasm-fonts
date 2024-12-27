@@ -1,0 +1,6 @@
+my own version of [[https://github.com/harfbuzz/harfbuzz-wasm-examples][harfbuzz/harfbuzz-wasm-examples]], with some fonts.
+contains some directories copied directly from that repo:
+
+- =bin= contains some helpful binaries, like otfsurgeon
+- =base-fonts= contains the base .ttf files
+- =harfbuzz-wasm= contains the rust crate with harfbuzz bindings

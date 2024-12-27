@@ -1,0 +1,13 @@
+[package]
+name = "roman-numerals"
+version = "0.1.0"
+edition = "2021"
+
+wasm-opt = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2.0"
+harfbuzz-wasm = { path="../harfbuzz-wasm" }
