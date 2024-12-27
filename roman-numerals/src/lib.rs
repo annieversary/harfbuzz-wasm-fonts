@@ -1,4 +1,4 @@
-use harfbuzz_wasm::{Font, Glyph, GlyphBuffer};
+use harfbuzz_wasm::{debug, Font, Glyph, GlyphBuffer};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -19,6 +19,7 @@ pub fn shape(
         if let Some(number) = unicode_codepoint_to_number(item.codepoint) {
             digits.push(number);
         } else {
+            // process digits, add them as roman numerals instead of the actual glyphs
             process_digits(&mut digits, &mut out);
 
             out.push(*item);
@@ -30,10 +31,22 @@ pub fn shape(
 
     // fix characters
     for item in out.iter_mut() {
+        let is_overline = item.codepoint == 0x305;
+
         // Map character to glyph
         item.codepoint = font.get_glyph(item.codepoint, 0);
-        // Set advance width
-        item.x_advance = font.get_glyph_h_advance(item.codepoint);
+
+        // Set advance
+        item.x_advance = if is_overline {
+            // overline doesn't move forward,
+            // since we want the next character at the same spot
+            0
+        } else {
+            font.get_glyph_h_advance(item.codepoint)
+        };
+
+        // we want overlines to be a bit higher
+        item.y_offset = if is_overline { 130 } else { 0 };
     }
 
     buffer.glyphs = out;
@@ -77,11 +90,11 @@ fn string_to_glyphs(string: &str) -> Vec<Glyph> {
         .chars()
         .enumerate()
         .map(|(ix, x)| Glyph {
-            codepoint: x as u32,
+            codepoint: if x == '_' { 0x305 } else { x as u32 },
             flags: 0,
             x_advance: 0,
             y_advance: 0,
-            cluster: ix as u32,
+            cluster: if x == '_' { ix + 1 } else { ix } as u32,
             x_offset: 0,
             y_offset: 0,
         })
@@ -90,18 +103,30 @@ fn string_to_glyphs(string: &str) -> Vec<Glyph> {
 
 fn number_to_roman_numeral(mut number: u64) -> String {
     let letters = [
-        (1000, "M"),
-        (900, "CM"),
+        (1_000_000, "_M"),
+        (900_000, "_C_M"),
+        (500_000, "_D"),
+        (400_000, "_C_D"),
+        (100_000, "_C"),
+        (90_000, "_X_C"),
+        (50_000, "_L"),
+        (40_000, "_X_L"),
+        (10_000, "_X"),
+        (9_000, "_I_X"),
+        (5_000, "_V"),
+        (4_000, "_I_V"),
+        (1_000, "M"),
+        (900, "C_M"),
         (500, "D"),
-        (400, "CD"),
+        (400, "C_D"),
         (100, "C"),
-        (90, "XC"),
+        (90, "X_C"),
         (50, "L"),
-        (40, "XL"),
+        (40, "X_L"),
         (10, "X"),
-        (9, "IX"),
+        (9, "I_X"),
         (5, "V"),
-        (4, "IV"),
+        (4, "I_V"),
         (1, "I"),
     ];
     let mut result = String::new();

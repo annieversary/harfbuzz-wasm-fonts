@@ -1,4 +1,4 @@
-BASE_FONT=../base-fonts/OpenSans-Regular.ttf
+BASE_FONT=../base-fonts/SourceCodePro-Regular.ttf
 TARGET_FONT=Roman-Regular.ttf
 WASM=roman_numerals_bg.wasm
 
