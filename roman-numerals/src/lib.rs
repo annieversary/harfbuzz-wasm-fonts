@@ -1,4 +1,4 @@
-use harfbuzz_wasm::{debug, Font, Glyph, GlyphBuffer};
+use harfbuzz_wasm::{Font, Glyph, GlyphBuffer};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -116,17 +116,17 @@ fn number_to_roman_numeral(mut number: u64) -> String {
         (5_000, "_V"),
         (4_000, "_I_V"),
         (1_000, "M"),
-        (900, "C_M"),
+        (900, "CM"),
         (500, "D"),
-        (400, "C_D"),
+        (400, "CD"),
         (100, "C"),
-        (90, "X_C"),
+        (90, "XC"),
         (50, "L"),
-        (40, "X_L"),
+        (40, "XL"),
         (10, "X"),
-        (9, "I_X"),
+        (9, "IX"),
         (5, "V"),
-        (4, "I_V"),
+        (4, "IV"),
         (1, "I"),
     ];
     let mut result = String::new();
@@ -139,4 +139,41 @@ fn number_to_roman_numeral(mut number: u64) -> String {
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_digits_to_number() {
+        fn test(digits: &[u8], expected: u64) -> bool {
+            digits_to_number(digits) == expected
+        }
+
+        assert!(test(&[1], 1));
+        assert!(test(&[2], 2));
+
+        assert!(test(&[1, 1, 1], 111));
+        assert!(test(&[1, 2, 3], 123));
+        assert!(test(&[3, 2, 1], 321));
+
+        assert!(test(&[3, 2, 1, 4, 5, 6], 321456));
+
+        assert!(test(&[], 0));
+    }
+
+    #[test]
+    fn test_number_to_roman_numeral() {
+        assert_eq!("I", number_to_roman_numeral(1));
+        assert_eq!("II", number_to_roman_numeral(2));
+        assert_eq!("IX", number_to_roman_numeral(9));
+        assert_eq!("XI", number_to_roman_numeral(11));
+
+        assert_eq!("CXXI", number_to_roman_numeral(121));
+
+        assert_eq!("MMCCCXXI", number_to_roman_numeral(2321));
+
+        assert_eq!("_XMMCCCXXI", number_to_roman_numeral(12321));
+    }
 }
